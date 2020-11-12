@@ -613,7 +613,14 @@ f.close()
 
 ```
 
-On lance le tout et ... tada !! on récupère le flag (en vrai il a fallut plusieurs essais)
+On lance le tout et ... tada !!
 
+<p align="center">
+  <img src="../ressources/evil_cipher/result.png">
+</p>
 
-400 points pour ce chall ce qui en fait celui qui vallait le plus de points (à égalité avec steganausorus).
+on récupère le flag **DGSESIEE{666bcd546262034826578452ffa448763b31010146999}**
+
+On peut donc valider ce challenge à 400 points. C'est le challenge qui vallait le plus de points (à égalité avec steganausorus).
+
+pour ceux qui voudrait le code en entier le voici je le met disponible ici (https://pt0m.github.io/ressources/evil_cipher/inv_cipher.php) *merci de laisser mon nom dessus si vous le partagez ;)*
