@@ -253,9 +253,128 @@ def key_expansion(key):
 	reg = 1*key
 	keys = []
 	for i in range(6):
-		keys.append(1*reg[:45])
+		keys.append(1*reg[:45]) #les rkeys correspondes au 45 premiers registres
 		reg = round_key(1*reg)
 	return keys
 ```
 
-c'est bon on a toutes les clefs !!
+**c'est bon on à toutes les clefs nécessaires !!**
+
+## Inversion de la fonction round
+
+Ensuite nous voulons inverser round, qui est écrite en vhdl dans `extrait_galois_field.vhdl`
+
+<details>
+<summary>Code vhdlcomplet pour la fonction round pour les curieux</summary>
+
+```VHDL
+--------------------------------------------
+-- Operations dans GF(32)
+-- avec le polynome : X^5+ X^2 +1
+--------------------------------------------
+
+  function permutation       (a : std_logic_vector(44 downto 0)) return  std_logic_vector is
+    variable b : std_logic_vector(44 downto 0);
+  begin
+    b(14 downto  0) := permutation15(a(29 downto 15));
+    b(29 downto 15) := permutation15(a(44 downto 30));
+    b(44 downto 30) := permutation15(a(14 downto  0));
+    return b;
+  end permutation;
+
+ function round (d : std_logic_vector(44 downto 0); key : std_logic_vector(44 downto 0)) return t_block is
+   variable tmp  : std_logic_vector(44 downto 0);
+   variable data : std_logic_vector(44 downto 0);
+ begin
+   tmp := permutation (d);   
+   for i in 0 to 8 loop
+      tmp(5*i+4 downto 5*i):= galois_inverse(tmp(5*i+4 downto 5*i));
+   end loop;
+
+   tmp := tmp xor key;
+
+   for i in 0 to 2 loop
+     data (15*i+4  downto 15*i   ) :=
+       tmp (15*i+4  downto 15*i)   xor
+       tmp (15*i+9  downto
+       15*i+5) xor
+       galois_multiplication(tmp(15*i+14  downto 15*i+10), "00010");
+
+     data (15*i+9  downto 15*i+5 ) :=
+       tmp (15*i+4  downto 15*i) xor
+       galois_multiplication(tmp (15*i+9  downto 15*i+5), "00010") xor
+       tmp (15*i+14  downto 15*i+10);     
+
+     data (15*i+14  downto 15*i+10 ) :=
+       galois_multiplication(tmp (15*i+4  downto 15*i), "00010") xor
+       tmp (15*i+9  downto 15*i+5) xor
+       tmp (15*i+14  downto 15*i+10);                                   
+   end loop;
+
+   return data;  
+ end round;
+
+end galois_field;
+```
+</details>
+
+on peux résumer la fonction round en plusieurs étapes:
+- une permutation sur le bloc d'entrée (qui utilise une fonction permutation15)
+- on prend chaque groupe de 5 bits, que l'on inverse en le considérant dans GF32
+- xor avec la clef de 45 bits (on les à récupéré précédement)
+- On prend 3 groupes de 5 bits qui nous donnent 5 nouveau groupes de 5 bits grace à un système d'équation dans GF32
+
+### La permutation
+Donc étape 1, grâce à l'image qui décrit la permutation15 on peux la recoder en python, ainsi que la permutation inverse.
+<p align="center">
+  <img src="../ressources/evil_cipher/permutation15.png">
+</p>
+Oui ça rappelle les jeux au deux des cereales ou il faut suivre une ligne...
+
+```python
+def permutation15(a):
+	b = []
+	ordre = [7,3,13,8,12,10,2,5,0,14,11,9,1,4,6]
+	for i in ordre:
+		b.append(a[i])
+	return b
+
+#la fonction inverse
+def permutation15_inv(b):
+	a = []
+	ordre = [8,12,6,1,13,7,14,0,3,11,5,10,4,2,9]
+	for i in ordre:
+		a.append(b[i])
+	return a
+```
+Avec ça on peux recoder la permutation complète décrite en vhdl:
+
+```VHDL
+function permutation       (a : std_logic_vector(44 downto 0)) return  std_logic_vector is
+  variable b : std_logic_vector(44 downto 0);
+begin
+  b(14 downto  0) := permutation15(a(29 downto 15));
+  b(29 downto 15) := permutation15(a(44 downto 30));
+  b(44 downto 30) := permutation15(a(14 downto  0));
+  return b;
+end permutation;
+```
+qui donne en python:
+
+```python
+def permutation(a):
+	b        = [0 for i in range(45)]
+	b[:15]   = permutation15(a[15:30])
+	b[15:30] = permutation15(a[30:45])
+	b[30:45] = permutation15(a[0:15])
+	return b
+#fonction inverse
+def permutation_inv(b):
+	a        = [0 for i in range(45)]
+	a[15:30] = permutation15_inv(b[:15])
+	a[30:45] = permutation15_inv(b[15:30])
+	a[0:15]  = permutation15_inv(b[30:45])
+	return a
+```
+
+voila la première étape, ensuite pour inverser les groupes de 5 bits (considéré dans GF32), on peux utiliser importer un fichier python codé par () qui à codé une implementation de GFXXX très propre et qui impléménte toute les opérations !
