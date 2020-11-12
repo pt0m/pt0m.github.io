@@ -428,8 +428,7 @@ Sur papier en appelant les groupe de 5 bits d'entrés `a`,`b` et `c` et ceux de 
 </p>
 on trouve de la même façon `b` et `c` ce qui permet de finir de recoder round et son inverse en python.
 
-
-```python
+```Python
 def xor(l1, l2):
 	l = []
 	for i in range(len(l1)):
@@ -466,9 +465,88 @@ def round_inv(data, key):
 	return d
 ```
 
-*c'est bon on a codé et inversé round ! il ne reste plus qu'a recoder la fonction principale qui lance les 5 rounds*
+c'est bon on a codé et inversé round ! il ne reste plus qu'a recoder la fonction principale qui lance les 5 rounds*
 
 ## Process principale et initialisation des variables
 
 On traduit le process principale décrit plus haut lors de la lecture du premier vhdl.
-Donc il nous faut code qui, genere les clef rkeys (il nous en faut 6) => effectue un xor
+
+Donc il nous faut code qui, genere les clef rkeys (déjà codé) => effectue un xor avec la première clef => la function round avec les 5 autres => sortie
+Donc pour l'inverse on a déjà tout de pret aussi:
+- Appeller notre générateur de clef pour recupérer les 6 `rkeys`
+- Sur notre chiffree on applique l'inverse de round avec les `rkeys` 6,5...,1
+- On xor avec `rkeys` 0
+- on resort le résultat
+et ceci permet de décoder un bloc!
+
+le code correspondant:
+
+```Python
+#la fonciton pour chiffrer
+def evil_cipher(key, din):
+	reg_data = [0 for i in range(45)]
+	ctr  = 0
+	#load
+	rkeys = key_expansion(key)
+	reg_data = 1*din
+	# rounds
+	for ctr in range(6):
+		if(ctr == 0):
+			reg_data = xor(1*rkeys[ctr], 1*reg_data)
+		else:
+			reg_data = round(1*reg_data, 1*rkeys[ctr])
+	return reg_data
+
+#la fonction pour déchiffrer
+def evil_cipher_inv(key, dout):
+	ctr = 0
+	rkeys = key_expansion(key)
+	reg_data = 1*dout
+	for ctr in [5,4,3,2,1,0]:
+		#print("".join([str(x) for x in reg_data]))
+		if(ctr == 0):
+			reg_data = xor(1*rkeys[ctr], 1*reg_data)
+		else:
+			reg_data = round_inv(1*reg_data, 1*rkeys[ctr])
+	return reg_data
+```
+
+C'est bon on peux déchiffrer un bloc !
+
+On charge donc la clef donnée dans notre script python (on inverse l'ordre des bits car dans mes listes le lsb est à l'indice 0).
+
+## Test de notre Algorithme de chiffrement dé
+
+On a plus qu'a tester notre algorithme avec le code python qui charge la clef et les bloc d'exemple donnée dans le fichier `evil_example.txt`
+
+```Python
+
+# on initialise la clef
+key = [int(x) for x in "{:064b}".format(0x4447534553494545)]
+key = key[::-1]
+#on met les 1 necessaire a gauche pour fair 64 bits
+while len(key) < 64:
+	print("key append 0")
+	key.append(0)
+
+#on prend le bloc à chiffré dans l'exemple
+din = [int(x) for x in "011001010111011001101001011011000000000000000"]
+din = din[::-1]
+
+#le bloc que l'on doit retrouver
+dout = [int(x) for x in "000101110010110001110101010111010101001010100"]
+dout = dout[::-1]
+
+
+#on test de chiffrer
+sortie = evil_cipher(key, din)
+#on verifie que notre algorithme a fonctionné
+if(sortie == dout):
+	print("test chiffrement: ok !")
+
+#on test de déchiffrer
+dechiffre = evil_cipher_inv(key, sortie)
+
+if(dechiffre == din):
+	print("test dechiffrement: ok !")
+```
