@@ -38,7 +38,7 @@ Puis on ouvre l'exemple:
   <img src="../ressources/evil_cipher/exemple.png">
 </p>
 
-On a donc un exemple qui chiffre code 45 bits avec la même clef donnée dans l'énoncé. (à noter que le code que le ficier à déchiffrer est égalemnt encodé avec des '0' et '1' ASCII)
+On a donc un exemple qui chiffre code 45 bits avec la même clef donnée dans l'énoncé. (à noter que le fichier à déchiffrer est égalemnt encodé avec des '0' et '1' ASCII)
 
 Tout les autres fichier servent à décricre l'algorithme implémenté sur FPGA.
 
@@ -421,11 +421,14 @@ for i in 0 to 2 loop
     tmp (15*i+14  downto 15*i+10);                                   
 end loop;
 ```
+
 que l'on peux inverser en prenant un papier et un stylo et en n'oubliant pas que `x xor x = 0`.
 Sur papier en appelant les groupe de 5 bits d'entrés `a`,`b` et `c` et ceux de sortie `alpha`, `beta`,`gamma` et `X` le polynome f(X) =X, (donc "00010" en binaire). Donc le calcul dans GF32 (le '+' etant xor):
+
 <p align="center">
   <img src="../ressources/evil_cipher/systeme.jpg">
 </p>
+
 on trouve de la même façon `b` et `c` ce qui permet de finir de recoder round et son inverse en python.
 
 ```python
