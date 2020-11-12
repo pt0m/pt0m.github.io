@@ -24,11 +24,18 @@ evil_cipher.zip (SHA256=0b8ade55e61e2e0188cea2a3c004287ca16b9b1ee2951fa4ffe1b279
 En somme il faut déchiffrer un fichier en aillant le code vhdl qui permet de systhetiser la puce de chiffrement.
 Bonne nouvelle la clef est donnée !
 
-## Ressources disponibles dans l'archive
+## Exemple fournit
 
 Alors c'est partit, on telecharge avec 'wget' pour ne pas utiliser la souris et faire plus pro. Dans l'archive fournit on trouve 6 fichiers.
 ![Alt Text](../ressources/evil_cipher/evil_cipher_ll1.png)
 
 Puis on ouvre l'example:
 ![Alt Text](../ressources/evil_cipher/exemple.png)
-##
+
+On a donc un exemple qui chiffre code 45 bits avec la même clef donnée dans l'énoncé. (à noter que le code que le ficier à déchiffrer est égalemnt encodé avec des '0' et '1' ASCII)
+
+Tout les autres fichier servent à décricre l'algorithme implémenté sur FPGA.
+
+## Etude de l'algorithme
+
+Tout d'abord on ouvre le evil-ciher
