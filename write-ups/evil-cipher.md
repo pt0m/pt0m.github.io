@@ -27,7 +27,10 @@ Bonne nouvelle la clef est donnée !
 ## Exemple fournit
 
 Alors c'est partit, on telecharge avec 'wget' pour ne pas utiliser la souris et faire plus pro. Dans l'archive fournit on trouve 6 fichiers.
-![Alt Text](../ressources/evil_cipher/evil_cipher_ll1.png)
+
+<p align="center">
+  ![Alt Text](../ressources/evil_cipher/evil_cipher_ll1.png)
+</p>
 
 Puis on ouvre l'example:
 ![Alt Text](../ressources/evil_cipher/exemple.png)
