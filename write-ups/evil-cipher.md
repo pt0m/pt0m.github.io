@@ -157,9 +157,6 @@ end architecture;
 </details>
 
 Tout d'abord on regarde les entrés de la puces qui sont decrites dans l'entité `evil_cipher`.
-<details>
-<summary>code</summary>
-<p>
 
 ```VHDL
 entity evil_cipher is
@@ -174,19 +171,14 @@ entity evil_cipher is
   );
 end entity;
 ```
-</p>
-</details>
+
 
 On y retrouve classiquement l'horloge `clk`, une entré pour `reset` la puce, une entrée `start` pour lancer le chiffrement, et `ready` qui doit probablement indiqué si la puce est prete ou bien si les données en sortie sont fixé (donc prete).
 Mais les entrés qui nous interrese vraiment sont les 3 autres:
 - `key` qui la clef qui est composé de 64 bits. Donc la clef donnée est de la bonne taille (ouf!)
 - `din` et `dout` qui sont composé de 45 bits. Cela nous apprend que l'algorithme chiffre très certainement par bloc de 45 bits! ça tombe bien c'est exactemetn la taille des données chiffrées dans le fichier exemple.
 
-###
-
 puis en lisant le code on retrouve un process qui décrit l'état du système
-<details>
-<summary>code</summary>
 
 ```VHDL
 process (current_state, start, ctr) is
@@ -211,7 +203,6 @@ begin
   end case;
 end process;
 ```
-</details>
 
 Visiblement le site est donc dans un état d'attente `idle` puis passe à `cipher` lorsqu'il chiffre et s'arrete lorsque `ctr` atteindra 5.
 
@@ -222,4 +213,49 @@ on peux résumer ce process la en disant que:
 - puis 5 tours `ctr = 1, ... , 5` ou on l'on applique la fonction `round` avec une clef donnée par `key_expansion`.
 - On à fini les données sont chiffrés.
 
-Pour inverser l'algorithme il nous faudra donc retrouver les clefs générer par ``
+Pour inverser l'algorithme il nous faudra donc retrouver les clefs de 45 bits généré par `key_expansion`, inverser 5 fois round avec les clef 5,4,...,1 puis xor avec la clef 0.
+
+## Generation des clefs en python.
+
+D'apres ce que l'on a vu précedement, l'algorithme effectue 6 "rounds" avec des clefs de 45 bits, sachant que notre clef est de 65 bits il va falloir retrouver ces petites clefs.
+Celles ci sont généré par `key_expansion` qui est décrit par ... une image ...
+<p align="center">
+  <img src="../ressources/evil_cipher/key_expansion.png">
+</p>
+On retrouve 64 registres. Graces au multiplexers Load permet de charger l'entré `key` de 65 bits dans les registres.
+à chaque coup d'horloge les registres sont modifiés. Et les clefs de 45 bits que nous cherchons sont représentés par les 45 premiers registres.
+à chaque tours d'horologe tout les registres prenent les valeurs des registres précédents sauf le registre 0 qui prend la valeur du 64 eme registre.
+et 3 autres registre qui prennent des valeurs de xor entre le registre précédent et le dernier.
+
+On peut donc recoder ce décalage de registre en python.
+
+```python
+def round_key(key):
+	if(len(key)!=64):
+		print("Error: taille de clef ne correspond pas dans al fonction round_key")
+	key_tmp = 1*key
+	#bidouillage mais les (1*) c'est pour avoir une copie profonde
+  #on décale tout de 1
+	key_tmp[1:] = 1*key[:-1]
+  #le 1er prend la valeur du 64ème
+	key_tmp[0] = 1*key[63]
+  #les trois registre qui on des xors
+	key_tmp[9] = key[8]^key[63]
+	key_tmp[34] = key[33]^key[63]
+	key_tmp[61] = key[60]^key[63]
+	return key_tmp
+```
+
+puis on utilise cette fonction 5 fois pour avoir toutes les clefs. que l'on stoque dans une liste :
+
+```python
+def key_expansion(key):
+	reg = 1*key
+	keys = []
+	for i in range(6):
+		keys.append(1*reg[:45])
+		reg = round_key(1*reg)
+	return keys
+```
+
+c'est bon on a toutes les clefs !!
