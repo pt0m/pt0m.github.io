@@ -330,7 +330,7 @@ Donc étape 1, grâce à l'image qui décrit la permutation15 on peux la recoder
 <p align="center">
   <img src="../ressources/evil_cipher/permutation15.jpg">
 </p>
-Oui ça rappelle les jeux au deux des cereales ou il faut suivre une ligne...
+Oui ça rappelle les jeux au dos des paquets de cereales ou il faut suivre une ligne...
 
 ```python
 def permutation15(a):
