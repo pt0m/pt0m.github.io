@@ -4,6 +4,7 @@ Voici mon write up pour "evil_cipher" un challenge proposé lors du ctf "Opérat
 
 C'est mon premier write-up, alors si il manque une explication n'hesitez pas à me prévenir à tom-pegeot@hotmail.fr
 
+
 ## Présentation du challenge
 Tout d'abord le challenge viens avec l'énoncé suivant:
 ```
@@ -49,7 +50,7 @@ Tout d'abord on ouvre le fichier qui decrit la puce à la plus grande échelle. 
 <summary>Cliquer ici pour affichier le code de evil-cipher.vhd</summary>
 <p>
 
-```vhdl
+```VHDL
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
@@ -160,7 +161,7 @@ Tout d'abord on regarde les entrés de la puces qui sont decrites dans l'entité
 <summary>code</summary>
 <p>
 
-```vhdl
+```VHDL
 entity evil_cipher is
   port (
     clk    : in  std_logic;
@@ -187,7 +188,7 @@ puis en lisant le code on retrouve un process qui décrit l'état du système
 <details>
 <summary>code</summary>
 
-```vhdl
+```VHDL
 process (current_state, start, ctr) is
 begin
   case current_state is
@@ -217,9 +218,8 @@ Visiblement le site est donc dans un état d'attente `idle` puis passe à `ciphe
 En regardant l'autre process un peu plus haut dans le code on comprend que l'algorithme à un fonctionnement proche de l'AES avec un système de round. permettant de chiffrer les données entrés en `din`
 on peux résumer ce process la en disant que:
 - au début du chiffrement, `load` vaut 1 (cf l'autre process) et `busy` vaux 0, durant laquel `key` est chargé dans `key_expansion`. Et nos données à chiffrer dans `reg_data`.On s'y attardera plus tard. Après cette étape `load = 0` et `busy = 1`, le compteur ctr va donc commencer.
-- puis 1 round `ctr = 0`, on prend une clef de 45 bits de `key_expansion` xor notre `reg_data`.
-- puis 5 tours `ctr = 1, ... , 5` ou on l'on applique la fonction `round` avec une clef donnée par `key_expansion`succesivement pour obtenir notre nouvelle valeurs du registre.
-- `dout` prend la valeur de reg_data donc l'algorithme est fini.
+- puis 1 round `ctr = 0`, on prend une clef de 45 bits à partir d'une entité `key_expansion`  que l'on xor à notre `reg_data`.
+- puis 5 tours `ctr = 1, ... , 5` ou on l'on applique la fonction `round` avec une clef donnée par `key_expansion`.
+- On à fini les données sont chiffrés.
 
-
-Ensuite dans le fichier on retrouve le mapping des entrés vers une entité `key_expansion`. Celle ci est décritte dans l'image
+Pour inverser l'algorithme il nous faudra donc retrouver les clefs générer par ``
