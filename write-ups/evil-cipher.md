@@ -45,8 +45,8 @@ Tout d'abord on ouvre le fichier qui decrit la puce à la plus grande échelle. 
 
 <details>
 <summary>Cliquer ici pour affichier le code de evil-cipher.vhd</summary>
-
-```VHDL
+<p>
+``` VHDL
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
@@ -149,5 +149,5 @@ begin
 
 end architecture;
 ```
-
+</p>
 </details>
