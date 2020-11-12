@@ -43,7 +43,7 @@ Tout les autres fichier servent à décricre l'algorithme implémenté sur FPGA.
 
 Tout d'abord on ouvre le fichier qui decrit la puce à la plus grande échelle. Ici après un rapide coup d'oeil c'est evil-ciher.vhd.
 
-<detail>
+<details>
 <summary>Cliquer ici pour affichier le code de evil-cipher.vhd</summary>
 
 ```VHDL
@@ -150,4 +150,4 @@ begin
 end architecture;
 ```
 
-</detail>
+</details>
