@@ -43,12 +43,13 @@ Tout les autres fichier servent à décricre l'algorithme implémenté sur FPGA.
 
 ## Etude de l'algorithme
 
-Tout d'abord on ouvre le fichier qui decrit la puce à la plus grande échelle. Ici après un rapide coup d'oeil c'est evil-ciher.vhd.
+Tout d'abord on ouvre le fichier qui decrit la puce à la plus grande échelle. Ici après un rapide coup d'oeil on remarque qu'il s'agit de evil-ciher.vhd. (avoir déjà utilisé ou lut du vhdl peu aider ^^ )
 
 <details>
 <summary>Cliquer ici pour affichier le code de evil-cipher.vhd</summary>
 <p>
-``` VHDL
+
+```vhdl
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
@@ -153,3 +154,10 @@ end architecture;
 ```
 </p>
 </details>
+
+Tout d'abord on regarde les entrés de la puces qui sont decrites dans l'entité `evil_cipher`.
+
+On y retrouve classiquement l'horloge `clk`, une entré pour `reset` la puce, une entrée `start` pour lancer le chiffrement, et `ready` qui doit probablement indiqué si la puce est prete ou bien si les données en sortie sont fixé (donc prete).
+Mais les entrés qui nous interrese vraiment sont les 3 autres:
+- `key` qui la clef qui est composé de 64 entré (1 ou 0). Donc la clef donnée est de la bonne taille (ouf!)
+- `din` et `dout` qui sont composé de 45 bits (1 ou 0). Cela nous apprend que l'algorithme chiffre très certainement par bloc de 45 bits! ça tombe bien c'est exactemetn la taille des données chiffrées dans le fichier exemple.
