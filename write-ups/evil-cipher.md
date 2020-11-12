@@ -42,6 +42,7 @@ On a donc un exemple qui chiffre code 45 bits avec la même clef donnée dans l'
 
 Tout les autres fichier servent à décrire l'algorithme implémenté sur FPGA.
 
+
 ## Etude de l'algorithme
 
 Tout d'abord on ouvre le fichier qui decrit la puce à la plus grande échelle. Ici après un rapide coup d'oeil on remarque qu'il s'agit de evil-ciher.vhd. (avoir déjà utilisé ou lut du vhdl peu aider ^^ )
