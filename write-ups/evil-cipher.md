@@ -29,11 +29,13 @@ Bonne nouvelle la clef est donnée !
 Alors c'est partit, on telecharge avec 'wget' pour ne pas utiliser la souris et faire plus pro. Dans l'archive fournit on trouve 6 fichiers.
 
 <p align="center">
-  ![Alt Text](../ressources/evil_cipher/evil_cipher_ll1.png)
+  <img src="../ressources/evil_cipher/evil_cipher_ll1.png">
 </p>
 
-Puis on ouvre l'example:
-![Alt Text](../ressources/evil_cipher/exemple.png)
+Puis on ouvre l'exemple:
+<p align="center">
+  <img src="../ressources/evil_cipher/exemple.png">
+</p>
 
 On a donc un exemple qui chiffre code 45 bits avec la même clef donnée dans l'énoncé. (à noter que le code que le ficier à déchiffrer est égalemnt encodé avec des '0' et '1' ASCII)
 
