@@ -471,7 +471,7 @@ def round_inv(data, key):
 ```
 c'est bon on a codé et inversé round ! il ne reste plus qu'a recoder la fonction principale qui lance les 5 rounds*
 
-## Process principale et initialisation des variables
+## Process principal en python
 
 On traduit le process principale décrit plus haut lors de la lecture du premier vhdl.
 
