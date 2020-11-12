@@ -178,8 +178,8 @@ end entity;
 
 On y retrouve classiquement l'horloge `clk`, une entré pour `reset` la puce, une entrée `start` pour lancer le chiffrement, et `ready` qui doit probablement indiqué si la puce est prete ou bien si les données en sortie sont fixé (donc prete).
 Mais les entrés qui nous interrese vraiment sont les 3 autres:
-- `key` qui la clef qui est composé de 64 entré (1 ou 0). Donc la clef donnée est de la bonne taille (ouf!)
-- `din` et `dout` qui sont composé de 45 bits (1 ou 0). Cela nous apprend que l'algorithme chiffre très certainement par bloc de 45 bits! ça tombe bien c'est exactemetn la taille des données chiffrées dans le fichier exemple.
+- `key` qui la clef qui est composé de 64 bits. Donc la clef donnée est de la bonne taille (ouf!)
+- `din` et `dout` qui sont composé de 45 bits. Cela nous apprend que l'algorithme chiffre très certainement par bloc de 45 bits! ça tombe bien c'est exactemetn la taille des données chiffrées dans le fichier exemple.
 
 ###
 
@@ -218,7 +218,7 @@ En regardant l'autre process un peu plus haut dans le code on comprend que l'alg
 on peux résumer ce process la en disant que:
 - au début du chiffrement, `load` vaut 1 (cf l'autre process) et `busy` vaux 0, durant laquel `key` est chargé dans `key_expansion`. Et nos données à chiffrer dans `reg_data`.On s'y attardera plus tard. Après cette étape `load = 0` et `busy = 1`, le compteur ctr va donc commencer.
 - puis 1 round `ctr = 0`, on prend une clef de 45 bits de `key_expansion` xor notre `reg_data`.
-- puis 5 tours `ctr = 1, ... , 5` ou on l'on applique la fonction `round` avec une clef donnée par `key_expansion`succesivement pour obtenir notre nouvelle valeurs du registre. 
+- puis 5 tours `ctr = 1, ... , 5` ou on l'on applique la fonction `round` avec une clef donnée par `key_expansion`succesivement pour obtenir notre nouvelle valeurs du registre.
 - `dout` prend la valeur de reg_data donc l'algorithme est fini.
 
 
