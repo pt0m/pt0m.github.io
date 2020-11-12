@@ -550,3 +550,70 @@ dechiffre = evil_cipher_inv(key, sortie)
 if(dechiffre == din):
 	print("test dechiffrement: ok !")
 ```
+
+on en profite déjà pour ecrire le code qui va aller chercher les données à déchiffrer dans `cipher.txt` si jamais sa marche du premier coup (evidement j'ai du corriger des détailles...)
+
+```Python
+
+print("chargement du fichier a dechiffrer et parsing ...")
+
+f = open("cipher.txt", "rb")
+donnees_chiffrees = f.read()
+f.close()
+#on retire le '\n' inutile
+donnees_chiffrees = donnees_chiffrees.replace(b"\n", b"")
+
+# On lit les blocks de 45 bits dans le fichier
+blocks = []
+for i in range(len(donnees_chiffrees)//45):
+	block = donnees_chiffrees[45*i: 45*(i+1)]
+	block = block.decode('ascii')
+	block = [int(i) for i in block]
+	blocks.append(block)
+
+
+#on déchiffre chaque bloc
+print("dechiffrement...")
+
+blocks_dechiffree = []
+for block in blocks:
+	block_dechiffree = evil_cipher_inv(key, block[::-1])[::-1]
+	block_dechiffree ="".join([str(i) for i in block_dechiffree])
+	blocks_dechiffree.append(block_dechiffree)
+
+dechiffree = "".join(blocks_dechiffree)
+
+print("ecriture du résultat dans dechiffree.txt")
+f = open("dechiffree.txt", "w")
+f.write(dechiffree)
+f.close()
+
+# conversion en ascii
+print("convertion ascii ...")
+
+def bin_to_ascii_char(a):
+	return chr(int(a,2))
+
+def bin_to_ascii(bin_str):
+	str_cp = 1*bin_str
+	if(len(str_cp)%8 != 8): #on ajuste pour avoir un multiple de 8 bits
+		str_cp += "0"*(8-(len(str_cp)%8))
+	result = ""
+	for i in range(len(str_cp)//8):
+		x = str_cp[i*8:(i+1)*8]
+		result += bin_to_ascii_char(x)
+	return result
+
+dechiffree_ascii = bin_to_ascii("".join(blocks_dechiffree)))
+
+print("ecriture du résultat dans dechiffree_ascii.txt")
+f = open("dechiffree_ascii.txt", "w")
+f.write(dechiffree_ascii)
+f.close()
+
+```
+
+On lance le tout et ... tada !! on récupère le flag (en vrai il a fallut plusieurs essais)
+
+
+400 points pour ce chall ce qui en fait celui qui vallait le plus de points (à égalité avec steganausorus).
