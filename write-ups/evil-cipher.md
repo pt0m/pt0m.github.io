@@ -156,7 +156,25 @@ end architecture;
 </details>
 
 Tout d'abord on regarde les entrés de la puces qui sont decrites dans l'entité `evil_cipher`.
+<details>
+<summary>Cliquer ici pour affichier le code de evil-cipher.vhd</summary>
+<p>
 
+```vhdl
+entity evil_cipher is
+  port (
+    clk    : in  std_logic;
+    resetn : in  std_logic;
+    start  : in  std_logic;
+    key    : in  std_logic_vector(63 downto 0);
+    din    : in  std_logic_vector(44 downto 0);
+    dout   : out std_logic_vector(44 downto 0);
+    ready  : out std_logic
+  );
+end entity;
+```
+</p>
+</details>
 On y retrouve classiquement l'horloge `clk`, une entré pour `reset` la puce, une entrée `start` pour lancer le chiffrement, et `ready` qui doit probablement indiqué si la puce est prete ou bien si les données en sortie sont fixé (donc prete).
 Mais les entrés qui nous interrese vraiment sont les 3 autres:
 - `key` qui la clef qui est composé de 64 entré (1 ou 0). Donc la clef donnée est de la bonne taille (ouf!)
