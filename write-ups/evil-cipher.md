@@ -220,7 +220,7 @@ Pour inverser l'algorithme il nous faudra donc retrouver les clefs de 45 bits g�
 D'apres ce que l'on a vu précedement, l'algorithme effectue 6 "rounds" avec des clefs de 45 bits, sachant que notre clef est de 65 bits il va falloir retrouver ces petites clefs.
 Celles ci sont généré par `key_expansion` qui est décrit par ... une image ...
 <p align="center">
-  <img src="../ressources/evil_cipher/key_expansion.png">
+  <img src="../ressources/evil_cipher/key_expansion.jpg">
 </p>
 On retrouve 64 registres. Graces au multiplexers Load permet de charger l'entré `key` de 65 bits dans les registres.
 à chaque coup d'horloge les registres sont modifiés. Et les clefs de 45 bits que nous cherchons sont représentés par les 45 premiers registres.
@@ -327,7 +327,7 @@ on peux résumer la fonction round en plusieurs étapes:
 ### La permutation
 Donc étape 1, grâce à l'image qui décrit la permutation15 on peux la recoder en python, ainsi que la permutation inverse.
 <p align="center">
-  <img src="../ressources/evil_cipher/permutation15.png">
+  <img src="../ressources/evil_cipher/permutation15.jpg">
 </p>
 Oui ça rappelle les jeux au deux des cereales ou il faut suivre une ligne...
 
@@ -377,4 +377,90 @@ def permutation_inv(b):
 	return a
 ```
 
-voila la première étape, ensuite pour inverser les groupes de 5 bits (considéré dans GF32), on peux utiliser importer un fichier python codé par () qui à codé une implementation de GFXXX très propre et qui impléménte toute les opérations !
+voila la première étape, ensuite pour inverser les groupes de 5 bits (donc polynome considéré dans GF32), on peux utiliser importer un fichier python codé par un certain Robert-Campbell (https://github.com/Robert-Campbell-256/Number-Theory-Python/blob/master/finitefield.py) qui implemente GFXXX de manière très propre et qui impléménte toute les opérations !
+grâce a ce github on peux implémenter facilement la multiplication et l'inverse. (pour l'inverse de 0 apèrs un test sur le code fini j'ai trouvé qu'il fallait utiliser le polynome nulle comme ce que donne le code de Robert Campbell).
+On Implémente le corp GF32 (avec le polynome X^5+ X^2 +1) comme indiqué dans le vhdl grâce à `GF32 = GF(2, [1,0,1,0,0])`
+On peux donc inverser les groupes de 5 bits (cette fonction s'inverse tout seul donc super simple a déchiffrer =))
+
+```Python
+#permet la conversion d'objet GF32 a nos liste de 0 et 1
+def gf_to_list(gf):
+	a = '{0:c}'.format(gf)
+	l = [1*(x=='1') for x in a]
+	while(len(l)<5): # normalement pas besoin mais pour etre sure on rajoute des bits si besoin
+		print("Error: mauvaise taille de polynome ! (la librairie devrait mettres les 0")
+		l.append(0)
+	return l
+
+def galois_inverse(a):
+	gf_a = FiniteFieldElt(GF32,a) #on passe en objet dans GF32
+	gf_b = gf_a.inv()
+	if(gf_b * gf_a != FiniteFieldElt(GF32, [1,0,0,0,0])):
+		return gf_to_list(gf_a) #arrive quand on demande l'inverse de 0
+	return gf_to_list(gf_b) # on retransforme le resultat en liste de 0 et 1
+```
+
+maintenant il ne reste que le système qui se repete 3 fois (1 fois par groupe de 15 bits):
+
+```vhdl
+for i in 0 to 2 loop
+  data (15*i+4  downto 15*i   ) :=
+    tmp (15*i+4  downto 15*i)   xor
+    tmp (15*i+9  downto
+    15*i+5) xor
+    galois_multiplication(tmp(15*i+14  downto 15*i+10), "00010");
+
+  data (15*i+9  downto 15*i+5 ) :=
+    tmp (15*i+4  downto 15*i) xor
+    galois_multiplication(tmp (15*i+9  downto 15*i+5), "00010") xor
+    tmp (15*i+14  downto 15*i+10);     
+
+  data (15*i+14  downto 15*i+10 ) :=
+    galois_multiplication(tmp (15*i+4  downto 15*i), "00010") xor
+    tmp (15*i+9  downto 15*i+5) xor
+    tmp (15*i+14  downto 15*i+10);                                   
+end loop;
+```
+que l'on peux inverser en prenant un papier et un stylo et en n'oubliant pas que `x xor x = 0`.
+Sur papier en appelant les groupe de 5 bits d'entrés `a`,`b` et `c` et ceux de sortie `alpha`, `beta`,`gamma` et `X` le polynome f(X) =X, (donc "00010" en binaire). Donc le calcul dans GF32 (le '+' etant xor):
+<p align="center">
+  <img src="../ressources/evil_cipher/systeme.jpg">
+</p>
+on trouve de la même façon `b` et `c`. Ce qui permet de finir de recoder round et son inverse en python.
+
+```python
+def xor(l1, l2):
+	l = []
+	for i in range(len(l1)):
+		l.append(1*(l1[i]^l2[i]))
+	return l
+
+  def round(d, key):
+  	tmp = [0 for i in range(45)]
+  	data = [0 for i in range(45)]
+  	tmp = permutation(d)
+  	for i in range(9):
+  		tmp[5*i: 5*i + 5] = galois_inverse(tmp[5*i:5*i+ 5])
+  	tmp = xor(tmp, key)
+  	for i in range(3):
+  		# 5 premiers bits
+  		data[15*i:15*i+5] = xor( xor( tmp[15*i:15*i+5], tmp[15*i+5:15*i+10]) , galois_multiplication(1*tmp[15*i+10:15*i+15]))
+  		# 5 suivants
+  		data[15*i+5:15*i+10] = xor( xor( tmp[15*i:15*i+5], galois_multiplication(1*tmp[15*i+5:15*i+10])) , tmp[15*i+10:15*i+15])
+  		# 5 suivants
+  		data[15*i+10:15*i+15] = xor( xor( galois_multiplication(1*tmp[15*i:15*i+5]), tmp[15*i+5:15*i+10]) , tmp[15*i+10:15*i+15])
+  	return data
+
+# grace au calcul papier...
+def round_inv(data, key):
+	tmp = [0 for i in range(45)]
+	for i in range(3): #obtenu par
+		tmp[15*i: 15*i+5] =  galois_div( xor(galois_div(xor(data[15*i: 15*i+5], data[15*i + 5: 15*i+10]), div = [1,1,0,0,0]),data[15*i+10: 15*i+15]) , div =[0,1,0,0,0])
+		tmp[15*i+5: 15*i+10] =  galois_div( xor(galois_div(xor(data[15*i: 15*i+5], data[15*i + 10: 15*i+15]), div = [1,1,0,0,0]),data[15*i+5: 15*i+10]) , div =[0,1,0,0,0])
+		tmp[15*i+10: 15*i+15] =  galois_div( xor(galois_div(xor(data[15*i+5: 15*i+10], data[15*i + 10: 15*i+15]), div = [1,1,0,0,0]),data[15*i: 15*i+5]) , div =[0,1,0,0,0])
+	tmp = xor(tmp, key)
+	for i in range(9):
+		tmp[5*i: 5*i +5] = galois_inverse(tmp[5*i:5*i+ 5])
+	d = permutation_inv(tmp)
+	return d
+```
