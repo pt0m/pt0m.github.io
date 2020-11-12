@@ -382,7 +382,7 @@ grâce a ce github on peux implémenter facilement la multiplication et l'invers
 On Implémente le corp GF32 (avec le polynome X^5+ X^2 +1) comme indiqué dans le vhdl grâce à `GF32 = GF(2, [1,0,1,0,0])`
 On peux donc inverser les groupes de 5 bits (cette fonction s'inverse tout seul donc super simple a déchiffrer =))
 
-```Python
+```python
 #permet la conversion d'objet GF32 a nos liste de 0 et 1
 def gf_to_list(gf):
 	a = '{0:c}'.format(gf)
@@ -428,7 +428,8 @@ Sur papier en appelant les groupe de 5 bits d'entrés `a`,`b` et `c` et ceux de 
 </p>
 on trouve de la même façon `b` et `c` ce qui permet de finir de recoder round et son inverse en python.
 
-```Python
+```python
+
 def xor(l1, l2):
 	l = []
 	for i in range(len(l1)):
@@ -464,7 +465,6 @@ def round_inv(data, key):
 	d = permutation_inv(tmp)
 	return d
 ```
-
 c'est bon on a codé et inversé round ! il ne reste plus qu'a recoder la fonction principale qui lance les 5 rounds*
 
 ## Process principale et initialisation des variables
@@ -481,7 +481,7 @@ et ceci permet de décoder un bloc!
 
 le code correspondant:
 
-```Python
+```python
 #la fonciton pour chiffrer
 def evil_cipher(key, din):
 	reg_data = [0 for i in range(45)]
@@ -515,11 +515,11 @@ C'est bon on peux déchiffrer un bloc !
 
 On charge donc la clef donnée dans notre script python (on inverse l'ordre des bits car dans mes listes le lsb est à l'indice 0).
 
-## Test de notre Algorithme de chiffrement dé
+## Test de notre Algorithme de chiffrement/déchiffrement
 
 On a plus qu'a tester notre algorithme avec le code python qui charge la clef et les bloc d'exemple donnée dans le fichier `evil_example.txt`
 
-```Python
+```python
 
 # on initialise la clef
 key = [int(x) for x in "{:064b}".format(0x4447534553494545)]
@@ -553,7 +553,7 @@ if(dechiffre == din):
 
 on en profite déjà pour ecrire le code qui va aller chercher les données à déchiffrer dans `cipher.txt` si jamais sa marche du premier coup (evidement j'ai du corriger des détailles...)
 
-```Python
+```python
 
 print("chargement du fichier a dechiffrer et parsing ...")
 
@@ -623,4 +623,4 @@ on récupère le flag **DGSESIEE{666bcd546262034826578452ffa448763b31010146999}*
 
 On peut donc valider ce challenge à 400 points. C'est le challenge qui vallait le plus de points (à égalité avec steganausorus).
 
-pour ceux qui voudrait le code en entier le voici je le met disponible ici (https://pt0m.github.io/ressources/evil_cipher/inv_cipher.php) *merci de laisser mon nom dessus si vous le partagez ;)*
+pour ceux qui voudrait le code en entier le voici je le met disponible ici (https://pt0m.github.io/ressources/evil_cipher/inv_evil_cipher.py) *merci de laisser mon nom dessus si vous le partagez ;)*
