@@ -426,7 +426,8 @@ Sur papier en appelant les groupe de 5 bits d'entrés `a`,`b` et `c` et ceux de 
 <p align="center">
   <img src="../ressources/evil_cipher/systeme.jpg">
 </p>
-on trouve de la même façon `b` et `c`. Ce qui permet de finir de recoder round et son inverse en python.
+on trouve de la même façon `b` et `c` ce qui permet de finir de recoder round et son inverse en python.
+
 
 ```python
 def xor(l1, l2):
@@ -464,3 +465,10 @@ def round_inv(data, key):
 	d = permutation_inv(tmp)
 	return d
 ```
+
+*c'est bon on a codé et inversé round ! il ne reste plus qu'a recoder la fonction principale qui lance les 5 rounds*
+
+## Process principale et initialisation des variables
+
+On traduit le process principale décrit plus haut lors de la lecture du premier vhdl.
+Donc il nous faut code qui, genere les clef rkeys (il nous en faut 6) => effectue un xor
