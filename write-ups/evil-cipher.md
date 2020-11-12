@@ -40,7 +40,7 @@ Puis on ouvre l'exemple:
 
 On a donc un exemple qui chiffre code 45 bits avec la même clef donnée dans l'énoncé. (à noter que le fichier à déchiffrer est égalemnt encodé avec des '0' et '1' ASCII)
 
-Tout les autres fichier servent à décricre l'algorithme implémenté sur FPGA.
+Tout les autres fichier servent à décrire l'algorithme implémenté sur FPGA.
 
 ## Etude de l'algorithme
 
