@@ -157,7 +157,7 @@ end architecture;
 
 Tout d'abord on regarde les entrés de la puces qui sont decrites dans l'entité `evil_cipher`.
 <details>
-<summary>Cliquer ici pour affichier le code de evil-cipher.vhd</summary>
+<summary>code</summary>
 <p>
 
 ```vhdl
@@ -175,7 +175,51 @@ end entity;
 ```
 </p>
 </details>
+
 On y retrouve classiquement l'horloge `clk`, une entré pour `reset` la puce, une entrée `start` pour lancer le chiffrement, et `ready` qui doit probablement indiqué si la puce est prete ou bien si les données en sortie sont fixé (donc prete).
 Mais les entrés qui nous interrese vraiment sont les 3 autres:
 - `key` qui la clef qui est composé de 64 entré (1 ou 0). Donc la clef donnée est de la bonne taille (ouf!)
 - `din` et `dout` qui sont composé de 45 bits (1 ou 0). Cela nous apprend que l'algorithme chiffre très certainement par bloc de 45 bits! ça tombe bien c'est exactemetn la taille des données chiffrées dans le fichier exemple.
+
+###
+
+puis en lisant le code on retrouve un process qui décrit l'état du système
+<details>
+<summary>code</summary>
+
+```vhdl
+process (current_state, start, ctr) is
+begin
+  case current_state is
+    when idle =>
+      if start = '1' then
+        next_state <= cipher;  
+      else
+        next_state <= idle;  
+      end if;
+      busy <= '0';
+      load <= start;
+    when cipher =>
+      if ctr < 5 then
+        next_state <= cipher;  
+      else
+        next_state <= idle;  
+      end if;
+      busy <= '1';
+      load <= '0';        
+  end case;
+end process;
+```
+</details>
+
+Visiblement le site est donc dans un état d'attente `idle` puis passe à `cipher` lorsqu'il chiffre et s'arrete lorsque `ctr` atteindra 5.
+
+En regardant l'autre process un peu plus haut dans le code on comprend que l'algorithme à un fonctionnement proche de l'AES avec un système de round. permettant de chiffrer les données entrés en `din`
+on peux résumer ce process la en disant que:
+- au début du chiffrement, `load` vaut 1 (cf l'autre process) et `busy` vaux 0, durant laquel `key` est chargé dans `key_expansion`. Et nos données à chiffrer dans `reg_data`.On s'y attardera plus tard. Après cette étape `load = 0` et `busy = 1`, le compteur ctr va donc commencer.
+- puis 1 round `ctr = 0`, on prend une clef de 45 bits de `key_expansion` xor notre `reg_data`.
+- puis 5 tours `ctr = 1, ... , 5` ou on l'on applique la fonction `round` avec une clef donnée par `key_expansion`succesivement pour obtenir notre nouvelle valeurs du registre. 
+- `dout` prend la valeur de reg_data donc l'algorithme est fini.
+
+
+Ensuite dans le fichier on retrouve le mapping des entrés vers une entité `key_expansion`. Celle ci est décritte dans l'image
