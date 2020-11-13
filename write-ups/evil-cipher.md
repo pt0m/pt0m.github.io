@@ -323,7 +323,7 @@ on peux résumer la fonction round en plusieurs étapes:
 - une permutation sur le bloc d'entrée (qui utilise une fonction permutation15)
 - on prend chaque groupe de 5 bits, que l'on inverse en le considérant dans GF32
 - xor avec la clef de 45 bits (on les à récupéré précédement)
-- On prend 3 groupes de 5 bits qui nous donnent 5 nouveau groupes de 5 bits grace à un système d'équation dans GF32
+- On prend 3 groupes de 5 bits qui nous donnent 3 nouveau groupes de 5 bits grace à un système d'équation dans GF32
 
 ### La permutation
 Donc étape 1, grâce à l'image qui décrit la permutation15 on peux la recoder en python, ainsi que la permutation inverse.
