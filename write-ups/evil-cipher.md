@@ -6,7 +6,7 @@ C'est mon premier write-up, alors si il manque une explication n'hesitez pas à 
 
 
 ## Présentation du challenge
-Tout d'abord le challenge viens avec l'énoncé suivant:
+Tout d'abord le challenge vient avec l'énoncé suivant:
 ```
 Evil Country a développé et implémenté sur FPGA son propre algorithme de chiffrement par blocs de 45 bits avec une clé de 64 bits. cipher.txt est un message chiffré avec la clé key=0x4447534553494545. Un agent a réussi à récupérer
 - le code VHDL de l'algorithme (evil_cipher.vhd)
